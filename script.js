@@ -86,10 +86,12 @@ const handleOutgoingMessage = (e) => {
 
     if (userMessage.includes("your name") || userMessage.includes("tell me about yourself")) {
         customResponse = "My name is Hateable AI.";
-    } else if (userMessage.includes("who are you")) {
+    } else if (userMessage.includes("who are you") || userMessage.includes("who r u")) {
         customResponse = "I am Hateable AI.";
-    } else if (userMessage.includes("creator") || userMessage.includes("who created you") || userMessage.includes("developer")) {
+    } else if (userMessage.includes("creator") || userMessage.includes("who created you") || userMessage.includes("who created u") || userMessage.includes("developer")) {
         customResponse = "My creator's name is Narayana Munganda.";
+    } else if (userMessage.includes("inventor") || (userMessage.includes("invents") || (userMessage.includes("who invented you") || (userMessage.includes("who invented u")) {
+        customResponse = "Narayana Munganda Invented me";
     }
 
     // --- Bot response with animation ---
@@ -189,3 +191,4 @@ sendMessageButton.addEventListener("click", (e) => handleOutgoingMessage(e));
 
 //File upload button click event
 document.querySelector("#file-upload").addEventListener("click", () => fileInput.click());
+
