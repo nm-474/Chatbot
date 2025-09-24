@@ -10,7 +10,7 @@ const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-
 
 const userData = {
     message: null,
-    file:{
+    file: {
         data: null,
         mime_type: null
     }   
@@ -36,7 +36,7 @@ const generateBoTResponse = async(incomingMessageDiv) => {
         body: JSON.stringify({
             contents: [{
                 parts: [{ text: userData.message }, ...(userData.file.data ? [{ inline_data: userData.file }] : [])]
-      }]
+            }]
         })
     }
 
@@ -61,10 +61,12 @@ const generateBoTResponse = async(incomingMessageDiv) => {
     }
 }
 
-//Handle outgoing user messages
+// ✅ Single unified function for handling outgoing messages
 const handleOutgoingMessage = (e) => {
     e.preventDefault();
     userData.message = messageInput.value.trim();
+    if (!userData.message) return;
+
     messageInput.value = "";
     fileUploadWrapper.classList.remove("file-uploaded");
     messageInput.dispatchEvent(new Event("input"));
@@ -73,28 +75,48 @@ const handleOutgoingMessage = (e) => {
     const messageContent = `<div class="message-text"></div>
                             ${userData.file.data ? `<img src="data:${userData.file.data.mime_type};base64,${userData.file.data}" class="attachment" />` : ""}`;
 
-    const outgoingMessageDiv =  createMessageElement(messageContent, "user-message");
+    const outgoingMessageDiv = createMessageElement(messageContent, "user-message");
     outgoingMessageDiv.querySelector(".message-text").textContent = userData.message;
     chatBody.appendChild(outgoingMessageDiv);
     chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
 
-    //simulate bot response with thinking indicator after a delay
-    setTimeout(() => {
-        const messageContent = `<img class="bot-avatar" src="https://github.com/nm-474/Chatbot/blob/main/Doraemon%20AI.png?raw=true" alt="Bot Logo" width="40" height="40" viewBox="0 0 1024 1024">
-                <div class="message-text">
-                    <div class="thinking-indicator">
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                        <div class="dot"></div>
-                    </div>
-                </div>`;
+    // --- Custom Fixed Answers ---
+    const userMessage = userData.message.toLowerCase();
+    let customResponse = null;
 
-        const incomingMessageDiv =  createMessageElement(messageContent, "bot-message", "thinking");
-        chatBody.appendChild(incomingMessageDiv);
+    if (userMessage.includes("your name") || userMessage.includes("tell me about yourself")) {
+        customResponse = "My name is Hateable AI.";
+    } else if (userMessage.includes("who are you")) {
+        customResponse = "I am Hateable AI.";
+    } else if (userMessage.includes("creator") || userMessage.includes("who created you") || userMessage.includes("developer")) {
+        customResponse = "My creator's name is Narayana Munganda.";
+    }
+
+    if (customResponse) {
+        // Show instant fixed answer (skip API)
+        const botMessageDiv = createMessageElement(`<div class="message-text">${customResponse}</div>`, "bot-message");
+        chatBody.appendChild(botMessageDiv);
         chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
-        generateBoTResponse(incomingMessageDiv);
-    }, 600);
+    } else {
+        // Otherwise call Gemini API (with thinking indicator)
+        setTimeout(() => {
+            const messageContent = `<img class="bot-avatar" src="https://github.com/nm-474/Chatbot/blob/main/Doraemon%20AI.png?raw=true" alt="Bot Logo" width="40" height="40">
+                    <div class="message-text">
+                        <div class="thinking-indicator">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>`;
+
+            const incomingMessageDiv = createMessageElement(messageContent, "bot-message", "thinking");
+            chatBody.appendChild(incomingMessageDiv);
+            chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+            generateBoTResponse(incomingMessageDiv);
+        }, 600);
+    }
 }
+
 //Handle Enter key press for sending messages
 messageInput.addEventListener("keydown", (e) => {
     const userMessage = e.target.value.trim();
@@ -123,9 +145,9 @@ fileInput.addEventListener("change", () => {
 
         //Store file data and mime type in userData object
         userData.file ={
-        data: base64string,
-        mime_type: file.type
-    }
+            data: base64string,
+            mime_type: file.type
+        }
         fileInput.value = "";
     }
 
@@ -157,46 +179,10 @@ const picker = new EmojiMart.Picker({
     }
 });
 
-// Handle outgoing user messages
-const handleOutgoingMessage = (message) => {
-    const chatBody = document.querySelector(".chat-body");
-
-    // Convert user message to lowercase for easier matching
-    const userMessage = message.toLowerCase();
-
-    let botResponse = "";
-
-    // --- Custom Fixed Answers ---
-    if (
-        userMessage.includes("your name") ||
-        userMessage.includes("tell me about yourself")
-    ) {
-        botResponse = "My name is Hateable AI.";
-    } else if(
-        userMessage.includes("who are you") 
-    ) {
-        botResponse = "I am Hateable AI.";
-    } else if (
-        userMessage.includes("creator") ||
-        userMessage.includes("who created you") ||
-        userMessage.includes("developer")
-    ) {
-        botResponse = "My creator's name is Narayana Munganda.";
-    } else {
-        // --- Default AI/Backend Response ---
-        botResponse = getBotResponse(userMessage); // Your existing logic
-    }
-
-    // Create bot message element
-    const botMessageElement = createMessageElement(botResponse, "bot-message");
-    chatBody.appendChild(botMessageElement);
-
-    // Scroll to bottom
-    chatBody.scrollTop = chatBody.scrollHeight;
-};
-
 document.querySelector(".chat-form").appendChild(picker);
 
+//Send button click event
 sendMessageButton.addEventListener("click", (e) => handleOutgoingMessage(e));
 
+//File upload button click event
 document.querySelector("#file-upload").addEventListener("click", () => fileInput.click());
