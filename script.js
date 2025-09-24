@@ -157,7 +157,46 @@ const picker = new EmojiMart.Picker({
     }
 });
 
+// Handle outgoing user messages
+const handleOutgoingMessage = (message) => {
+    const chatBody = document.querySelector(".chat-body");
+
+    // Convert user message to lowercase for easier matching
+    const userMessage = message.toLowerCase();
+
+    let botResponse = "";
+
+    // --- Custom Fixed Answers ---
+    if (
+        userMessage.includes("your name") ||
+        userMessage.includes("tell me about yourself")
+    ) {
+        botResponse = "My name is Hateable AI.";
+    } else if(
+        userMessage.includes("who are you") 
+    ) {
+        botResponse = "I am Hateable AI.";
+    } else if (
+        userMessage.includes("creator") ||
+        userMessage.includes("who created you") ||
+        userMessage.includes("developer")
+    ) {
+        botResponse = "My creator's name is Narayana Munganda.";
+    } else {
+        // --- Default AI/Backend Response ---
+        botResponse = getBotResponse(userMessage); // Your existing logic
+    }
+
+    // Create bot message element
+    const botMessageElement = createMessageElement(botResponse, "bot-message");
+    chatBody.appendChild(botMessageElement);
+
+    // Scroll to bottom
+    chatBody.scrollTop = chatBody.scrollHeight;
+};
+
 document.querySelector(".chat-form").appendChild(picker);
 
 sendMessageButton.addEventListener("click", (e) => handleOutgoingMessage(e));
+
 document.querySelector("#file-upload").addEventListener("click", () => fileInput.click());
