@@ -90,7 +90,7 @@ const handleOutgoingMessage = (e) => {
         customResponse = "I am Hateable AI.";
     } else if (userMessage.includes("creator") || userMessage.includes("who created you") || userMessage.includes("who created u") || userMessage.includes("developer")) {
         customResponse = "My creator's name is Narayana Munganda.";
-    } else if (userMessage.includes("inventor") || (userMessage.includes("invents") || (userMessage.includes("who invented you") || (userMessage.includes("who invented u")) {
+    } else if (userMessage.includes("inventor") || userMessage.includes("invents") || userMessage.includes("who invented you") || userMessage.includes("who invented u")) {
         customResponse = "Narayana Munganda Invented me";
     }
 
@@ -191,4 +191,5 @@ sendMessageButton.addEventListener("click", (e) => handleOutgoingMessage(e));
 
 //File upload button click event
 document.querySelector("#file-upload").addEventListener("click", () => fileInput.click());
+
 
