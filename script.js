@@ -40,20 +40,20 @@ const generateBoTResponse = async(incomingMessageDiv) => {
         })
     }
 
-    try{
+    try {
         const response = await fetch(API_URL, requestOptions);
         const data = await response.json();
-        if(!response.ok) throw new Error(data.error.message);
+        if (!response.ok) throw new Error(data.error.message);
 
         //Extract and display bot response
         const apiResponseText = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
         messageElement.innerText = apiResponseText;
-    }catch (error){
+    } catch (error) {
         //Handle and display errors
         console.log(error);
         messageElement.innerText = error.message;
         messageElement.style.color = "#ff0000";
-    }finally{
+    } finally {
         //Reset userData and remove thinking indicator
         userData.file = {};
         incomingMessageDiv.classList.remove("thinking");
@@ -92,35 +92,38 @@ const handleOutgoingMessage = (e) => {
         customResponse = "My creator's name is Narayana Munganda.";
     }
 
-    if (customResponse) {
-        // Show instant fixed answer (skip API)
-        const botMessageDiv = createMessageElement(`<div class="message-text">${customResponse}</div>`, "bot-message");
-        chatBody.appendChild(botMessageDiv);
-        chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
-    } else {
-        // Otherwise call Gemini API (with thinking indicator)
-        setTimeout(() => {
-            const messageContent = `<img class="bot-avatar" src="https://github.com/nm-474/Chatbot/blob/main/Doraemon%20AI.png?raw=true" alt="Bot Logo" width="40" height="40">
-                    <div class="message-text">
-                        <div class="thinking-indicator">
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                        </div>
-                    </div>`;
+    // --- Bot response with animation ---
+    setTimeout(() => {
+        const messageContent = `<img class="bot-avatar" src="https://github.com/nm-474/Chatbot/blob/main/Doraemon%20AI.png?raw=true" alt="Bot Logo" width="40" height="40">
+                <div class="message-text">
+                    <div class="thinking-indicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>`;
 
-            const incomingMessageDiv = createMessageElement(messageContent, "bot-message", "thinking");
-            chatBody.appendChild(incomingMessageDiv);
-            chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+        const incomingMessageDiv = createMessageElement(messageContent, "bot-message", "thinking");
+        chatBody.appendChild(incomingMessageDiv);
+        chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+
+        if (customResponse) {
+            // If fixed response → simulate typing animation
+            setTimeout(() => {
+                incomingMessageDiv.querySelector(".message-text").innerText = customResponse;
+                incomingMessageDiv.classList.remove("thinking");
+            }, 1200); // delay for natural effect
+        } else {
+            // Otherwise call Gemini API
             generateBoTResponse(incomingMessageDiv);
-        }, 600);
-    }
+        }
+    }, 600);
 }
 
 //Handle Enter key press for sending messages
 messageInput.addEventListener("keydown", (e) => {
     const userMessage = e.target.value.trim();
-    if(e.key === "Enter" && userMessage && !e.shiftKey && window.innerWidth > 768){
+    if (e.key === "Enter" && userMessage && !e.shiftKey && window.innerWidth > 768) {
         handleOutgoingMessage(e);
     }
 });
@@ -135,7 +138,7 @@ messageInput.addEventListener("input", () => {
 //Handle file input change event and preview selected image
 fileInput.addEventListener("change", () => {
     const file = fileInput.files[0];
-    if(!file) return;
+    if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -144,7 +147,7 @@ fileInput.addEventListener("change", () => {
         const base64string = e.target.result.split(",")[1];
 
         //Store file data and mime type in userData object
-        userData.file ={
+        userData.file = {
             data: base64string,
             mime_type: file.type
         }
@@ -166,14 +169,14 @@ const picker = new EmojiMart.Picker({
     skinTonePosition: "none",
     previewPosition: "none",
     onEmojiSelect: (emoji) => {
-        const {selectionStart: start, selectionEnd: end} = messageInput;
+        const { selectionStart: start, selectionEnd: end } = messageInput;
         messageInput.setRangeText(emoji.native, start, end, "end");
         messageInput.focus();
     },
     onClickOutside: (e) => {
-        if(e.target.id === "emoji-picker") {
+        if (e.target.id === "emoji-picker") {
             document.body.classList.toggle("show-emoji-picker");
-        }   else{
+        } else {
             document.body.classList.remove("show-emoji-picker");
         }
     }
